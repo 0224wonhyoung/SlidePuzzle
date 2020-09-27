@@ -3,7 +3,7 @@ import random
 
 width = 4
 height = 4
-
+hiddenPiece = 0
 setGameOption(GameOption.INVENTORY_BUTTON, False)
 setGameOption(GameOption.MESSAGE_BOX_BUTTON, False)
 
@@ -13,11 +13,12 @@ arr = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]]
 dx = [1, 0, -1, 0]
 dy = [0, 1, 0, -1]
 
-def addInRange(x, y, f, t):
-    s = x+y
-    if f<=s and s<=t:
-        return s
-    return -1
+def checkFin():
+    for i in range(0, width*height):
+        cpiece = piece[i]
+        if cpiece.x != (cpiece.num % width) or cpiece.y != int(cpiece.num/height):
+            return False
+    return True
 
 def piece_onMouseAction(object, x, y, action):
     objNum = -1
@@ -35,7 +36,17 @@ def printArr():
         if piece[i].hidden == True:
             print(str(i)+" is hide")
 
-
+def shuffle():
+    global hiddenPiece
+    for i in range(0, width*height):
+        piece[i].backToInit()
+    hNum = random.randint(0,width*height-1)
+    piece[hNum].hide()
+    hiddenPiece = hNum
+    print(hiddenPiece)
+    for i in range(0, 10):
+        randN = random.randint(0,3)        
+        piece[hNum].swap(randN)
 
 
 class Piece:
@@ -51,6 +62,13 @@ class Piece:
         
         self.pieceObj.onMouseActionDefault = piece_onMouseAction
 
+    def backToInit(self):
+        self.x = self.num % width
+        self.y = int(self.num/height)
+        self.locate(self.x, self.y)
+        self.show()
+        arr[self.y][self.x] = self.num
+
     def hide(self):
         self.pieceObj.hide()
         self.hidden = True
@@ -61,6 +79,22 @@ class Piece:
 
     def locate(self, x, y):
         self.pieceObj.locate(scene, 340 + 150*self.x, 510 - 150*self.y)
+
+    def swap(self, dir):        
+        tx = self.x + dx[dir]
+        ty = self.y + dy[dir]        
+        if -1 < tx and tx < width and -1 < ty and ty < height :
+            tn = arr[ty][tx]
+            
+            piece[tn].x = self.x
+            piece[tn].y = self.y
+            piece[tn].locate(self.x, self.y)
+            arr[self.y][self.x] = tn
+
+            self.x = tx
+            self.y = ty
+            self.locate(tx, ty)
+            arr[ty][tx] = self.num 
 
     def try_swap(self):
         #near = False
@@ -98,18 +132,29 @@ piece = []
 for i in range(0, width*height):
     piece.append(Piece(width, height, i))
 
-
-piece[random.randint(0,width*height-1)].hide()
-
 def piece_onMouseAction(object, x, y, action):
     objNum = -1
     for i in range(0, width*height):
         if piece[i].pieceObj == object:
             objNum = i
             piece[i].try_swap()
+            if checkFin():
+                piece[hiddenPiece].show()
+                showMessage("ClEAR!")
+
     #printArr()
 
 Object.onMouseActionDefault = piece_onMouseAction 
+
+
+startButton = Object("Images/start.png")
+startButton.locate(scene, 590, 10)
+startButton.show()
+
+def button_onMouseAction(x, y, action):
+    shuffle()
+startButton.onMouseAction = button_onMouseAction
+
 
 #for i in range(0, width*height):
 #    piece[i].pieceObj.onMouseActionDefault = piece_onMouseAction
