@@ -141,6 +141,7 @@ def piece_onMouseAction(object, x, y, action):
             if checkFin():
                 piece[hiddenPiece].show()
                 showMessage("ClEAR!")
+                startButton.show()
 
     #printArr()
 
@@ -152,6 +153,7 @@ startButton.locate(scene, 590, 10)
 startButton.show()
 
 def button_onMouseAction(x, y, action):
+    startButton.hide()
     shuffle()
 startButton.onMouseAction = button_onMouseAction
 
