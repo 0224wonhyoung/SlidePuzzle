@@ -1,5 +1,6 @@
 from bangtal import *
 import random
+import time
 
 shuffleNum = 10
 stageNum = 1
@@ -8,6 +9,10 @@ height = [3, 4, 5]
 piece_width = [200, 150, 120]
 piece_height = [200, 150, 120]
 hiddenPiece = 0
+startTime = 0
+finishTime = 0
+infinite = 0x7FFFFFFF
+topRate = [infinite, infinite, infinite]
 inGame = False
 setGameOption(GameOption.INVENTORY_BUTTON, False)
 setGameOption(GameOption.MESSAGE_BOX_BUTTON, False)
@@ -18,8 +23,7 @@ arr =[[[0, 1, 2], [3, 4, 5], [6, 7, 8]], [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10,
 dx = [1, 0, -1, 0]
 dy = [0, 1, 0, -1]
 
-def printStageNum():
-    print(stageNum)
+
 
 def checkFin():
     for i in range(0, width[stageNum]*height[stageNum]):
@@ -31,13 +35,29 @@ def checkFin():
 def piece_onMouseAction(object, x, y, action):
     global stageNum
     global inGame
+    global startTime
+    global finishTime
+    global topRate
+    global infinite
     for i in range(0, width[stageNum]*height[stageNum]):
         if piece[stageNum][i].pieceObj == object:            
             piece[stageNum][i].try_swap()
             if inGame == True and checkFin():                
                 inGame = False
+                finishTime = time.time()
+                clearTime = finishTime-startTime
                 piece[stageNum][hiddenPiece].show()
-                showMessage("ClEAR!")
+                mes = ""
+                if(clearTime < topRate[stageNum]):
+                    if topRate[stageNum] == infinite:
+                        mes = "["+format(clearTime, ".2f")+"]초로 첫 클리어!"                        
+                    else:
+                        mes = "["+format(clearTime, ".2f")+"]초로 기존의 [" + format(topRate[stageNum], ".2f")+"]초 기록을 갱신하고 최고기록"
+                    topRate[stageNum] = clearTime
+                else:
+                    mes = "["+format(clearTime, ".2f")+"]초 경과 (최고기록 ["+format(topRate[stageNum], ".2f") + "]초)"
+                showMessage(mes)
+               
                 startButton[stageNum].show()
             return
     for i in range(0, 3):
@@ -45,13 +65,14 @@ def piece_onMouseAction(object, x, y, action):
             stageNum = i
             initStage()
             scene[i].enter()
-            printStageNum()
+            
             return
     for i in range(0, 3):
         if object == startButton[i]:            
             shuffle()
             startButton[i].hide()            
             inGame = True
+            startTime = time.time()
             return
     for i in range(0, 3):
         if object == menuButton[i]:
@@ -207,7 +228,7 @@ for i in range(0, 3):
 #for i in range(0, width*height):
 #    piece[i].pieceObj.onMouseActionDefault = piece_onMouseAction
 
-
+print(time.time())
 startGame(scene_menu)
 
 
