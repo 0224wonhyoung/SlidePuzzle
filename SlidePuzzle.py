@@ -2,7 +2,7 @@ from bangtal import *
 import random
 import time
 
-shuffleNum = 10
+shuffleNum = 200
 stageNum = 1
 width = [3, 4, 5]
 height = [3, 4, 5]
@@ -22,9 +22,14 @@ scene_menu = Scene("SlidePuzzle","Images/stage1/배경1.jpg")
 arr =[[[0, 1, 2], [3, 4, 5], [6, 7, 8]], [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11], [12, 13, 14, 15]],[[0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14], [15, 16,17, 18, 19], [20, 21, 22, 23, 24]] ]
 dx = [1, 0, -1, 0]
 dy = [0, 1, 0, -1]
+sound_clear = Sound("Sounds/StageClear.mp3")
+bgm = Sound("Sounds/bgm.mp3")
 
+timer1 = Timer(2.0)
 
-
+def timer_onTime():
+    sound_clear.stop()
+timer1.onTimeout = timer_onTime
 def checkFin():
     for i in range(0, width[stageNum]*height[stageNum]):
         cpiece = piece[stageNum][i]
@@ -45,6 +50,10 @@ def piece_onMouseAction(object, x, y, action):
             if inGame == True and checkFin():                
                 inGame = False
                 finishTime = time.time()
+                
+                sound_clear.play(False)
+                timer1.set(2.0)
+                timer1.start()
                 clearTime = finishTime-startTime
                 piece[stageNum][hiddenPiece].show()
                 mes = ""
@@ -228,7 +237,5 @@ for i in range(0, 3):
 #for i in range(0, width*height):
 #    piece[i].pieceObj.onMouseActionDefault = piece_onMouseAction
 
-print(time.time())
+bgm.play(True)
 startGame(scene_menu)
-
-
